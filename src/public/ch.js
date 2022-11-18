@@ -5,7 +5,7 @@ const socketClient2 = io();
 const chatContainer = document.getElementById("chatContainer");
 
 
-socketClient2.on("messagesChat", (data)=>{
+socketClient2.on("messagesChat", async (data)=>{
     console.log(data)
     let messages = "";
     data.forEach(element => {

@@ -1,110 +1,80 @@
-class Contenedor{
+const fs = require("fs");
+class chatInfo{
 
-    productos = [
-        {
-            "title": "abrigo",
-            "price": 65,
-            "thumbnail": "https://media.istockphoto.com/photos/trenchcoat-picture-id518177352?k=20&m=518177352&s=612x612&w=0&h=ou-nQusk6JNcXpOMECx1tI_ib-JdpY74ZjctvJIT904=",
-            "id": 1
-          },
-          {
-            "title": "zapatos",
-            "price": 70,
-            "thumbnail": "https://img.lalr.co/cms/2017/12/05165632/Zapatos.jpg",
-            "id": 2
-          }
-    ];
-    
-
-    constructor(){
+    constructor (filename){
+        this.filename = filename
     };
 
-    save(objeto){
+    async save(objeto){
         try{
-            if(this.productos.length > 0){
-                const lastId = this.productos[this.productos.length-1].id + 1;
-                objeto.id = lastId;
-                this.productos.push(objeto);
-                return objeto
-            } else{
+            if(fs.existsSync(this.filename)){
+                const mensajes = await this.getAll();
+                if(mensajes.length > 0){
+                    const lastId = mensajes[mensajes.length-1].id + 1;
+                    objeto.id = lastId;
+                    mensajes.push(objeto);
+                    fs.promises.writeFile(this.filename, JSON.stringify(mensajes, null, 2))
+                } else{
+                    objeto.id = 1
+                    fs.promises.writeFile(this.filename, JSON.stringify([objeto], null, 2))
+                }
+            } else {
                 objeto.id = 1
-                this.productos.push(objeto);
-                return objeto
+                fs.promises.writeFile(this.filename, JSON.stringify([objeto], null, 2))
             }
-
         } catch (error) {
             return "error, no se pudo guardar."
         }
 
     }
 
-    getAll(){
+    async getAll(){
         try {
-            if(this.productos.length == 0){
-                return "No hay productos"
-            }else {
-                return this.productos;
+            const contenido = await fs.promises.readFile(this.filename, "utf8");
+            if(contenido.length > 0){
+                const mensajes = JSON.parse(contenido);
+                return mensajes;
+            } else{
+                return [];
             }
+            
         } catch (error) {
-            return "error en lectura de productos"
+            return "error en lectura de mensajes"
         }
         
     }
 
-    getById(id){
+
+    async getById(id){
         try {
-            if(id <= this.productos.length){
-            const producto = this.productos.find(elemento=>elemento.id == id);
+            const productos = await this.getAll();
+            const producto = productos.find(elemento=>elemento.id === id);
             return producto;
-            } 
-            else{
-                return {"error":"producto no encontrado"}
-            }
-
         } catch (error) {
-            return {"error":"producto no encontrado"}
+            return "no se encuentra producto"
         }
     }
 
-    editById(id, obj){
-        try {
-            if(id <= this.productos.length){
-                this.productos[id - 1] = obj
-                return " producto editado con éxito"
-            }
-            else{
-                return {"error":"producto no encontrado"}
-            }
-            
-        } catch (error) {
-            return {"error":"producto no encontrado"}
-        }
-    }
-
-    deleteByiD(id){
+    async deleteByiD(id){
         try{
-            if(id <= this.productos.length){
-                const nProds = this.productos.filter(elemento=>elemento.id != id)
-                this.productos = nProds
-                return "eliminado con exito"}
-                else{
-                    return {"error":"producto no encontrado"}
-                }
+            const productos = await this.getAll();
+            const nProds = productos.filter(elemento=>elemento.id !== id)
+            fs.promises.writeFile(this.filename, JSON.stringify(nProds, null, 2))
         } catch (error){
-            return {"error":"producto no encontrado"}
+            return "no se puede eliminar"
         }
     }
 
-    deleteAll(){
-        this.productos = []
-        return ("datos eliminados")
+    async deleteAll(){
+        fs.promises.writeFile(this.filename,"")
+        console.log("datos eliminados")
     }
     
 }
 
 
 
-module.exports={ Contenedor }
+module.exports={ chatInfo }
 
 
 

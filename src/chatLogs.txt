@@ -1,0 +1,32 @@
+[
+  {
+    "author": "maria@gmail.com",
+    "date": "17/11/2022 09:25:12",
+    "text": "Hola a todos :)",
+    "id": 1
+  },
+  {
+    "author": "drew@gmail.com",
+    "date": "17/11/2022 18:48",
+    "text": "hola!!",
+    "id": 2
+  },
+  {
+    "author": "pepe@mail.com",
+    "date": "17/11/2022 18:55",
+    "text": "saludos",
+    "id": 3
+  },
+  {
+    "author": "mary@outlook.com",
+    "date": "17/11/2022 18:58",
+    "text": "como están?",
+    "id": 4
+  },
+  {
+    "author": "maria@gmail.com",
+    "date": "17/11/2022 19:0",
+    "text": "todo bien",
+    "id": 5
+  }
+]

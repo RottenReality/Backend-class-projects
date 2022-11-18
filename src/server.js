@@ -1,8 +1,10 @@
+const fs = require("fs");
 const express = require('express');
 const { Router } = require('express');
 const handlebars = require('express-handlebars');
 const path = require('path');
 const cla = require('./ej');
+const loc = require('./chatLogs');
 const {Server} = require("socket.io")
 
 const viewsFolder = path.join(__dirname, "views");
@@ -19,6 +21,7 @@ app.use(express.urlencoded({extended: true}))
 const server = app.listen(PORT, ()=>console.log(`Server listening on ${PORT}`));
 
 let ob = new cla.Contenedor()
+let lc = new loc.chatInfo("./chatLogs.txt")
 
 const routerProductos = Router();
 
@@ -29,19 +32,13 @@ app.set("view engine", "handlebars");
 
 const io = new Server(server);
 
-const messages = [
-    { author: "Juan@gmail.com", date: "17/11/22 12:25:32", text: "¡Hola! ¿Que tal?" },
-    { author: "Pedro@outlook.com", date: "17/11/22 12:26:10", text: "¡Muy bien! ¿Y vos?" },
-    { author: "Ana@yahoo.com", date: "17/11/22 12:26:25", text: "¡Genial!" }
-];
-
 
 io.on("connection", async(socket)=>{
     console.log("Nuevo cliente conectado")
     //envio de productos cada vez que el socket se conecte
     socket.emit("productsArray", await ob.getAll())
 
-    socket.emit("messagesChat", messages);
+    socket.emit("messagesChat", await lc.getAll());
 
     //recibir producto
     socket.on("newProduct", async(data)=>{
@@ -51,9 +48,9 @@ io.on("connection", async(socket)=>{
         
     })
 
-    socket.on("newMsg", (data)=>{
-        messages.push(data);
-        io.sockets.emit("messagesChat", messages);
+    socket.on("newMsg", async(data)=>{
+        await lc.save(data);
+        io.sockets.emit("messagesChat", await lc.getAll());
     })
 })
 
