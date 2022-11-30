@@ -3,9 +3,11 @@ const express = require('express');
 const { Router } = require('express');
 const handlebars = require('express-handlebars');
 const path = require('path');
-const cla = require('./ej');
+const contenedorProds = require('./ej');
 const loc = require('./chatLogs');
 const {Server} = require("socket.io")
+const {options} = require("./config/dataBaseConfig");
+const {contenedorSQL} = require('./managers/contenedorSQL');
 
 const viewsFolder = path.join(__dirname, "views");
 
@@ -20,8 +22,10 @@ app.use(express.urlencoded({extended: true}))
 
 const server = app.listen(PORT, ()=>console.log(`Server listening on ${PORT}`));
 
-let ob = new cla.Contenedor()
-let lc = new loc.chatInfo("./chatLogs.txt")
+//let ob = new contenedorProds.Contenedor()
+const productoApi = new contenedorSQL(options.mariaDB, "productos");
+const chatApi = new contenedorSQL(options.sqliteDB, "chat");
+//let lc = new loc.chatInfo("./chatLogs.txt")
 
 const routerProductos = Router();
 
@@ -36,21 +40,23 @@ const io = new Server(server);
 io.on("connection", async(socket)=>{
     console.log("Nuevo cliente conectado")
     //envio de productos cada vez que el socket se conecte
-    socket.emit("productsArray", await ob.getAll())
+    socket.emit("productsArray", await productoApi.getAll())
 
-    socket.emit("messagesChat", await lc.getAll());
+    //socket.emit("messagesChat", await messages);
 
     //recibir producto
     socket.on("newProduct", async(data)=>{
-        await ob.save(data);
+        await productoApi.save(data);
         //enviar todos los productos actualizados
-        io.sockets.emit("productsArray", await ob.getAll());
+        io.sockets.emit("productsArray", await productoApi.getAll());
         
     })
 
     socket.on("newMsg", async(data)=>{
-        await lc.save(data);
-        io.sockets.emit("messagesChat", await lc.getAll());
+        //await chatApi.save(data);
+        await chatApi.save(data);
+        const messages = await chatApi.getAll();
+        io.sockets.emit("messagesChat", await messages);
     })
 })
 
@@ -58,8 +64,8 @@ app.get("/",(req, res)=>{
     res.render("add");
 })
 
-routerProductos.get("/",(req, res)=>{
-    const listProductos = ob.getAll();
+routerProductos.get("/",async (req, res)=>{
+    const listProductos = await productoApi.getAll();
     if(listProductos == "No hay productos"){
         res.render("vacio", {
             mensaje: listProductos
@@ -73,7 +79,7 @@ routerProductos.get("/",(req, res)=>{
 
 routerProductos.post("/",(req, res)=>{
     let productoNuevo = req.body;
-    let productoAgregado = ob.save(productoNuevo);
+    let productoAgregado = productoApi.save(productoNuevo);
     res.redirect("/");
 })
 
