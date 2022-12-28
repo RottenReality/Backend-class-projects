@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Chair",
+    "price": "892.00",
+    "thumbnail": "https://loremflickr.com/640/480",
+    "id": 1
+  },
+  {
+    "title": "Table",
+    "price": "180.00",
+    "thumbnail": "https://loremflickr.com/640/480",
+    "id": 2
+  },
+  {
+    "title": "Mouse",
+    "price": "960.00",
+    "thumbnail": "https://loremflickr.com/640/480",
+    "id": 3
+  },
+  {
+    "title": "Table",
+    "price": "578.00",
+    "thumbnail": "https://loremflickr.com/640/480",
+    "id": 4
+  },
+  {
+    "title": "Pants",
+    "price": "762.00",
+    "thumbnail": "https://loremflickr.com/640/480",
+    "id": 5
+  }
+]

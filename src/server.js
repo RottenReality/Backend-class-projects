@@ -1,4 +1,3 @@
-const fs = require("fs");
 const express = require('express');
 const { Router } = require('express');
 const handlebars = require('express-handlebars');
@@ -8,6 +7,9 @@ const loc = require('./chatLogs');
 const {Server} = require("socket.io")
 const {options} = require("./config/dataBaseConfig");
 const {contenedorSQL} = require('./managers/contenedorSQL');
+const {faker} = require('@faker-js/faker');
+const {commerce, image } = faker;
+const {Contenedor} = require('./managers/contenedorProductos');
 
 const viewsFolder = path.join(__dirname, "views");
 
@@ -22,12 +24,15 @@ app.use(express.urlencoded({extended: true}))
 
 const server = app.listen(PORT, ()=>console.log(`Server listening on ${PORT}`));
 
-//let ob = new contenedorProds.Contenedor()
+
 const productoApi = new contenedorSQL(options.mariaDB, "productos");
 const chatApi = new contenedorSQL(options.sqliteDB, "chat");
-//let lc = new loc.chatInfo("./chatLogs.txt")
+
+const prManager = new Contenedor("./src/files/products.txt");
+
 
 const routerProductos = Router();
+const routerTest = Router();
 
 app.engine("handlebars", handlebars.engine());
 
@@ -42,7 +47,6 @@ io.on("connection", async(socket)=>{
     //envio de productos cada vez que el socket se conecte
     socket.emit("productsArray", await productoApi.getAll())
 
-    //socket.emit("messagesChat", await messages);
 
     //recibir producto
     socket.on("newProduct", async(data)=>{
@@ -83,4 +87,29 @@ routerProductos.post("/",(req, res)=>{
     res.redirect("/");
 })
 
+//------------------------------------------
+routerTest.get("/",async (req,res)=>{
+    for(let i =0 ; i < 6; i++){
+            await prManager.save5();
+    }
+    res.send("generados");
+})
+
+routerTest.get("/productos-test",async (req,res)=>{
+    const randomProds = await prManager.getAll();
+    if(randomProds == "error en lectura de productos"){
+        res.render("vacio", {
+            mensaje: randomProds
+        })
+    }else {
+        res.render("list", {
+            productos: randomProds
+        })
+    }
+})
+
+
+
+
 app.use('/productos', routerProductos);
+app.use('/api', routerTest);

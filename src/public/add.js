@@ -10,7 +10,7 @@ productForm.addEventListener("submit", (event)=>{
         thumbnail: document.getElementById("thumbnail").value,
     }
 
-    socketClient.emit("newProduct", product); 
+    socketClient.emit("newProduct", product);
 });
 
 const productsContainer = document.getElementById("productsContainer");
