@@ -1,0 +1,54 @@
+[
+  {
+    "author": {
+      "id": "andresorregolopez@gmail.com",
+      "edad": "21",
+      "nombre": "Andrés OL",
+      "apellido": "Orrego",
+      "alias": "Rotten",
+      "avatar": "https://static.wikia.nocookie.net/deadbydaylight_gamepedia_en/images/0/00/New_Store_Nurse.png/revision/latest?cb=20220325045802"
+    },
+    "date": "2/1/2023 16:35",
+    "text": "hola",
+    "id": 1
+  },
+  {
+    "author": {
+      "id": "aboundedtohught4@gmail.com",
+      "edad": "33",
+      "nombre": "Pedro",
+      "apellido": "Lopez",
+      "alias": "Plop12",
+      "avatar": "example"
+    },
+    "date": "2/1/2023 17:14",
+    "text": "lol",
+    "id": 2
+  },
+  {
+    "author": {
+      "id": "aboundedtohught4@gmail.com",
+      "edad": "33",
+      "nombre": "Pedro",
+      "apellido": "Lopez",
+      "alias": "Plop12",
+      "avatar": "example"
+    },
+    "date": "2/1/2023 17:14",
+    "text": "hola?",
+    "id": 3
+  },
+  {
+    "author": {
+      "id": "ejemplo@123.com",
+      "edad": "18",
+      "nombre": "Pepe",
+      "apellido": "Hernandez",
+      "alias": "Blue44",
+      "avatar": "ej"
+    },
+    "date": "2/1/2023 18:29",
+    "text": ":D",
+    "id": 4
+  }
+]
