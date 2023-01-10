@@ -8,6 +8,11 @@ const {contenedorSQL} = require('./managers/contenedorSQL');
 const {Contenedor} = require('./managers/contenedorProductos');
 const {ContenedorChat} = require('./managers/contenedorChats');
 const {normalize, schema} = require('normalizr');
+const session = require('express-session');
+const cookieParser = require("cookie-parser");
+const MongoStore = require('connect-mongo');
+const {authRouter} = require('./routes/web/authRouter')
+
 
 const viewsFolder = path.join(__dirname, "views");
 
@@ -34,9 +39,23 @@ const routerProductos = Router();
 const routerTest = Router();
 
 app.engine("handlebars", handlebars.engine());
-
 app.set("views", viewsFolder);
 app.set("view engine", "handlebars");
+
+
+app.use(cookieParser());
+
+app.use(session({
+    store:MongoStore.create({
+        mongoUrl:options.mongoAtlasSessions.urlDatabase,
+        ttl: 600
+    }),
+    secret:"claveSecreta",
+    resave:false,
+    saveUninitialized:false
+}))
+
+app.use(authRouter);
 
 const io = new Server(server);
 
@@ -65,7 +84,11 @@ io.on("connection", async(socket)=>{
 })
 
 app.get("/",(req, res)=>{
-    res.render("add");
+    if(req.session.username){
+        res.render("add",{name:req.session.username}); 
+    } else {
+        res.redirect("/login");
+    }
 })
 
 routerProductos.get("/",async (req, res)=>{

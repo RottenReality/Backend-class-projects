@@ -16,6 +16,9 @@ const options = {
             filename:path.join(__dirname, "../DB/chatdb.sqlite")  
         },
         useNullAdDefault:true
+    },
+    mongoAtlasSessions:{
+        urlDatabase:"mongodb+srv://rottenreality:BgkBxsB9PWTvBNoW@coderbackend.oorljea.mongodb.net/sessionsDB?retryWrites=true&w=majority"
     }
 }
 

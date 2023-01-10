@@ -1,5 +1,7 @@
 {{> importScripts }}
 <div>
+    <h2>--Bienvenido, {{name}}--</h2>
+    <button onclick="location.href='/logout'">Cerrar sesión</button>
     <h2>agregar productos</h2>
     <form id="productForm">
         <label>Titulo:</label>
@@ -12,6 +14,8 @@
         <button type="submit">Guardar</button>
     </form>
 </div>
+
+
 
 <div id="productsContainer"></div>
 
