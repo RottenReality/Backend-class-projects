@@ -12,6 +12,21 @@ const session = require('express-session');
 const cookieParser = require("cookie-parser");
 const MongoStore = require('connect-mongo');
 const {authRouter} = require('./routes/web/authRouter')
+const passport = require('passport');
+const { mongoose } = require('mongoose');
+const LocalStrategy = {Strategy} = require('passport-local');
+const {UserModel} = require('./models/user') 
+
+//conexion base de datos
+const URLDB = "mongodb+srv://rottenreality:BgkBxsB9PWTvBNoW@coderbackend.oorljea.mongodb.net/sessionsDB?retryWrites=true&w=majority";
+
+mongoose.connect(URLDB, {
+    useNewUrlParser:true,
+    useUnifiedTopology: true
+}, (error)=>{
+    if(error) console.log("conexion fallida");
+    console.log("base de datos conectada correctamente")
+});
 
 
 const viewsFolder = path.join(__dirname, "views");
@@ -53,7 +68,16 @@ app.use(session({
     secret:"claveSecreta",
     resave:false,
     saveUninitialized:false
-}))
+}));
+
+//vinculacion de passport con el servidor
+app.use(passport.initialize());//inicializacion de passport
+app.use(passport.session());
+
+
+//config serializar y deserializar
+
+
 
 app.use(authRouter);
 
@@ -82,6 +106,23 @@ io.on("connection", async(socket)=>{
         io.sockets.emit("messagesChat", await normalizarMensajes());
     })
 })
+
+passport.serializeUser((user, done)=>{
+    return done(null, user.id)
+});
+passport.deserializeUser((id,done)=>{
+    UserModel.findById(id,(error,userFound)=>{
+        return done(error,userFound)
+    })
+});
+
+app.get("/registro",(req,res)=>{
+    res.render("signup")
+});
+
+app.get("/profile",(req,res)=>{
+    res.render("profile");
+});
 
 app.get("/",(req, res)=>{
     if(req.session.username){
@@ -165,3 +206,51 @@ const normalizarMensajes = async()=>{
     return normalizedMessages;
 }
 
+
+//estrategia de registro de usuarios
+passport.use("signupStrategy", new LocalStrategy(
+    {
+        passReqToCallBack:true,
+        usernameField:"email"
+    },
+    (req, username, password, done)=>{
+        UserModel.findOne({email:username},(err,userFound)=>{
+            if(err) return done(err);
+            if(userFound) return done(null, false, {message:"El usuario ya existe"})
+            const newUser = {
+                username:req.body.username,
+                email:username,
+                password:password
+            }
+            UserModel.create(newUser, (err, userCreated)=>{
+                if(err) return done(err,null,{message:"Error al crear el usuario"})
+                return done(null,userCreated)
+            })
+        })
+    }
+))
+
+app.post("/signup",passport.authenticate("signupStrategy",{
+    failureRedirect:"/errorSignUp",
+    failureMessage: true
+}),
+(req,res)=>{
+    res.redirect("/profile")
+});
+
+app.post("/login",(req,res)=>{
+    // const {email, password} = req.body;
+    // //validamos si eciste el usuario
+    // const userFound = users.find(elm=>elm.email === email);
+    // if(userFound){
+    //     //verificar la contraseña
+    //     if(userFound.password === password){
+    //         req.session.user = req.body;
+    //         res.render("profile")
+    //     } else{
+    //         res.render("login",{error:"contraseña invalida"});
+    //     }
+    // } else{
+    //     res.render("login", {error:"El usuario no existe, crea una cuenta"});
+    // }
+});

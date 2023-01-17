@@ -1,8 +1,15 @@
-<h1>formulario de ingreso</h1>
-<div>
+<h2 class="mx-5 my-2">Formulario de Ingreso</h2>
+<div class="mx-5 my-2">
+    {{#if error}}
+        <p>{{error}}</p>
+    {{/if}}
     <form action="/login" method="post">
-        <label for="Nombre: "></label>
-        <input type="text" placeholder="Ingresa nombre" name="name">
-        <button type="submit">Ingresar</button>
+        <label>Email:</label>
+        <input type="text" placeholder="Ingresa email" name="email">
+        <label>Password:</label>
+        <input type="text" placeholder="Ingresa contraseña" name="password">
+        <button type="submit" class="btn btn-info my-3">Ingresar</button>
     </form>
+    <hr>
+    <a href="/registro">Todavía no tienes una cuenta?, registrate</a>
 </div>
