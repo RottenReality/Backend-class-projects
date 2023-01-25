@@ -16,9 +16,11 @@ const passport = require('passport');
 const { mongoose } = require('mongoose');
 const LocalStrategy = {Strategy} = require('passport-local');
 const {UserModel} = require('./models/user') 
+const {prRouter} = require('./routes/web/prRouter')
+const {randomRouter} = require('./routes/web/randomRouter')
 
 //conexion base de datos
-const URLDB = "mongodb+srv://rottenreality:BgkBxsB9PWTvBNoW@coderbackend.oorljea.mongodb.net/sessionsDB?retryWrites=true&w=majority";
+const URLDB = "mongodb+srv://rottenreality:BgkBxsB9PWTvBNoW@coderbackend.oorljea.mongodb.net/coderDB?retryWrites=true&w=majority";
 
 mongoose.connect(URLDB, {
     useNewUrlParser:true,
@@ -78,8 +80,9 @@ app.use(passport.session());
 //config serializar y deserializar
 
 
-
-app.use(authRouter);
+app.use(prRouter);
+app.use('/api',randomRouter);
+//app.use(authRouter);
 
 const io = new Server(server);
 
@@ -207,7 +210,7 @@ const normalizarMensajes = async()=>{
 }
 
 
-//estrategia de registro de usuarios
+//----------------------------------------estrategia de registro de usuarios-------------------------------
 passport.use("signupStrategy", new LocalStrategy(
     {
         passReqToCallBack:true,
@@ -217,15 +220,30 @@ passport.use("signupStrategy", new LocalStrategy(
         UserModel.findOne({email:username},(err,userFound)=>{
             if(err) return done(err);
             if(userFound) return done(null, false, {message:"El usuario ya existe"})
-            const newUser = {
-                username:req.body.username,
-                email:username,
-                password:password
+            else{
+                const newUser = {
+                    email:username,
+                    password:password
             }
+            
             UserModel.create(newUser, (err, userCreated)=>{
                 if(err) return done(err,null,{message:"Error al crear el usuario"})
-                return done(null,userCreated)
+                else{
+                    return done(null,userCreated);
+                }
+                
             })
+        
+        };
+            // const newUser = {
+            //     username:req.body.username,
+            //     email:username,
+            //     password:password
+            // };
+            // UserModel.create(newUser, (err, userCreated)=>{
+            //     if(err) return done(err,null,{message:"Error al crear el usuario"})
+            //     return done(null,userCreated)
+            // })
         })
     }
 ))
@@ -235,6 +253,7 @@ app.post("/signup",passport.authenticate("signupStrategy",{
     failureMessage: true
 }),
 (req,res)=>{
+    console.log(req.body);
     res.redirect("/profile")
 });
 
@@ -253,4 +272,17 @@ app.post("/login",(req,res)=>{
     // } else{
     //     res.render("login", {error:"El usuario no existe, crea una cuenta"});
     // }
+
+    const {name} = req.body;
+    req.session.username = name;
+    console.log(req.session);
+    res.redirect("/");
+});
+
+app.get("/logout",(req,res)=>{
+    const name = req.session.username;
+    req.session.destroy(err=>{
+        if(err) return res.redirect("/home");
+        res.render("logout", {name: name})
+    })
 });

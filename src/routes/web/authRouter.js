@@ -6,12 +6,12 @@ authRouter.get("/login",(req,res)=>{
     res.render("login")
 });
 
-// authRouter.post("/login",(req,res)=>{
-//     const {name} = req.body;
-//     req.session.username = name;
-//     console.log(req.session);
-//     res.redirect("/");
-// });
+authRouter.post("/login",(req,res)=>{
+    const {name} = req.body;
+    req.session.username = name;
+    console.log(req.session);
+    res.redirect("/");
+});
 
 
 
