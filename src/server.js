@@ -18,16 +18,21 @@ const LocalStrategy = {Strategy} = require('passport-local');
 const {UserModel} = require('./models/user') 
 const {prRouter} = require('./routes/web/prRouter')
 const {randomRouter} = require('./routes/web/randomRouter')
+const {envConfig} = require('./config/envConfig')
+const {puerto} = require('./config/minimistConfig');
 
 //conexion base de datos
-const URLDB = "mongodb+srv://rottenreality:BgkBxsB9PWTvBNoW@coderbackend.oorljea.mongodb.net/coderDB?retryWrites=true&w=majority";
+//const URLDB = "mongodb+srv://rottenreality:BgkBxsB9PWTvBNoW@coderbackend.oorljea.mongodb.net/coderDB?retryWrites=true&w=majority";
+const URLDB = envConfig.DB
 
 mongoose.connect(URLDB, {
     useNewUrlParser:true,
     useUnifiedTopology: true
 }, (error)=>{
-    if(error) console.log("conexion fallida");
-    console.log("base de datos conectada correctamente")
+    if(error) {console.log("conexion fallida: ")}
+    else{
+        console.log("base de datos conectada correctamente")
+    }   
 });
 
 
@@ -35,7 +40,7 @@ const viewsFolder = path.join(__dirname, "views");
 
 const app = express();
 
-PORT = 8080;
+PORT = puerto || 8080;
 
 app.use(express.static(__dirname+"/public"));
 
