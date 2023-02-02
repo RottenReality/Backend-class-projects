@@ -19,11 +19,14 @@ const {UserModel} = require('./models/user')
 const {prRouter} = require('./routes/web/prRouter')
 const {randomRouter} = require('./routes/web/randomRouter')
 const {envConfig} = require('./config/envConfig')
-const {puerto} = require('./config/minimistConfig');
+const {puerto, modo} = require('./config/minimistConfig');
+const cluster = require('cluster');
+const os = require('os');
 
 //conexion base de datos
 //const URLDB = "mongodb+srv://rottenreality:BgkBxsB9PWTvBNoW@coderbackend.oorljea.mongodb.net/coderDB?retryWrites=true&w=majority";
-const URLDB = envConfig.DB
+const URLDB = envConfig.DB;
+const numeroCpus = os.cpus().length;
 
 mongoose.connect(URLDB, {
     useNewUrlParser:true,
@@ -47,7 +50,22 @@ app.use(express.static(__dirname+"/public"));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 
-const server = app.listen(PORT, ()=>console.log(`Server listening on ${PORT}`));
+let server = "";
+
+if(modo == "CLUSTER" && cluster.isPrimary){
+    for(let i=0; i<numeroCpus; i++){
+        cluster.fork();
+    }
+
+    cluster.on("exit",(worker)=>{
+        console.log(`Este subproceso ${worker.process.pid} dejó de funcionar`);
+        cluster.fork();
+    })
+} else{
+    server = app.listen(PORT, ()=>console.log(`Server listening on ${PORT} on ${process.pid} en modo ${modo}`));
+}
+
+
 
 
 const productoApi = new contenedorSQL(options.mariaDB, "productos");
@@ -133,6 +151,7 @@ app.get("/profile",(req,res)=>{
 });
 
 app.get("/",(req, res)=>{
+    res.send(`server ejecutandose en ${PORT} en el proceso ${process.pid}`)
     if(req.session.username){
         res.render("add",{name:req.session.username}); 
     } else {

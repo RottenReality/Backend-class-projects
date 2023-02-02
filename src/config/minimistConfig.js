@@ -4,4 +4,6 @@ const argumentos = parseArgs(process.argv.slice(2))
 
 const puerto = argumentos._[0];
 
-module.exports = {puerto};
+const modo = argumentos._[1] || "FORK";
+
+module.exports = {puerto, modo};
