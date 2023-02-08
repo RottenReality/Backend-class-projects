@@ -22,6 +22,8 @@ const {envConfig} = require('./config/envConfig')
 const {puerto, modo} = require('./config/minimistConfig');
 const cluster = require('cluster');
 const os = require('os');
+const compression = require('compression');
+const {logger} = require('./logger')
 
 //conexion base de datos
 //const URLDB = "mongodb+srv://rottenreality:BgkBxsB9PWTvBNoW@coderbackend.oorljea.mongodb.net/coderDB?retryWrites=true&w=majority";
@@ -32,9 +34,9 @@ mongoose.connect(URLDB, {
     useNewUrlParser:true,
     useUnifiedTopology: true
 }, (error)=>{
-    if(error) {console.log("conexion fallida: ")}
+    if(error) {logger.error("conexion fallida: ")}
     else{
-        console.log("base de datos conectada correctamente")
+        logger.info("base de datos conectada correctamente")
     }   
 });
 
@@ -58,11 +60,11 @@ if(modo == "CLUSTER" && cluster.isPrimary){
     }
 
     cluster.on("exit",(worker)=>{
-        console.log(`Este subproceso ${worker.process.pid} dejó de funcionar`);
+        logger.warn(`Este subproceso ${worker.process.pid} dejó de funcionar`);
         cluster.fork();
     })
 } else{
-    server = app.listen(PORT, ()=>console.log(`Server listening on ${PORT} on ${process.pid} en modo ${modo}`));
+    server = app.listen(PORT, ()=>logger.info(`Server listening on ${PORT} on ${process.pid} en modo ${modo}`));
 }
 
 
@@ -99,6 +101,7 @@ app.use(session({
 app.use(passport.initialize());//inicializacion de passport
 app.use(passport.session());
 
+app.use(compression());
 
 //config serializar y deserializar
 
@@ -111,7 +114,7 @@ const io = new Server(server);
 
 
 io.on("connection", async(socket)=>{
-    console.log("Nuevo cliente conectado")
+    logger.info("Nuevo cliente conectado")
     //envio de productos cada vez que el socket se conecte
     socket.emit("productsArray", await productoApi.getAll())
 
@@ -277,7 +280,7 @@ app.post("/signup",passport.authenticate("signupStrategy",{
     failureMessage: true
 }),
 (req,res)=>{
-    console.log(req.body);
+    logger.info(req.body);
     res.redirect("/profile")
 });
 
@@ -299,7 +302,7 @@ app.post("/login",(req,res)=>{
 
     const {name} = req.body;
     req.session.username = name;
-    console.log(req.session);
+    logger.info(req.session);
     res.redirect("/");
 });
 
