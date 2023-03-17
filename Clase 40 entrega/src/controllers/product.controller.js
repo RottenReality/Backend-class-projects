@@ -1,13 +1,12 @@
-import { UserService } from "../services/user.service.js";
+import { ProductService } from "../services/product.service.js";
 
 
-class UserController{
+class ProductController{
 
-    static async getUsers(req,res){
+    static async getProducts(req,res){
         try {
-            const users = await UserService.getUsers();
-            console.log(users)
-            res.render("html-onwire",{personas:users});
+            const prods = await ProductService.getProducts();
+            res.render("html-onwire",{productos:prods});
             // res.status(200).json({
             //     status:"SUCCESS",
             //     data:response
@@ -20,10 +19,10 @@ class UserController{
         }
     };
 
-    static async saveUser(req,res){
+    static async saveProduct(req,res){
         try {
-            await UserService.saveUser(req.body);
-            res.redirect("/users");
+            await ProductService.saveProduct(req.body);
+            res.redirect("/products");
             // res.status(200).json({
             //     status:"SUCCESS",
             //     data:response
@@ -36,9 +35,9 @@ class UserController{
         }
     };
 
-    static async getUser(req,res){
+    static async getProduct(req,res){
         try {
-            const response = await UserService.getUser(req.params.id);
+            const response = await ProductService.getProduct(req.params.id);
             res.status(200).json({
                 status:"SUCCESS",
                 data:response
@@ -53,4 +52,4 @@ class UserController{
 
 }
 
-export {UserController}
+export {ProductController}
